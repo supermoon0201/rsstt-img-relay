@@ -17,7 +17,7 @@ const DEFAULT_CONFIG = {
     selfURL: "", // to be filled later
     URLRegExp: "^(\\w+://.+?)/(.*)$",
     // 从 https://sematext.com/ 申请并修改令牌
-    sematextToken: "00000000-0000-0000-0000-000000000000",
+    sematextToken: "",
     // 是否丢弃请求中的 Referer，在目标网站应用防盗链时有用
     dropReferer: true,
     // weibo workarounds
@@ -26,6 +26,12 @@ const DEFAULT_CONFIG = {
     // sspai workarounds
     sspaiCDN: [".sspai.com"],
     sspaiReferer: "https://sspai.com/",
+    // hellogithub
+    hellogithubCDN: [".hellogithub.com"],
+    hellogithubReferer: "https://hellogithub.com/",
+    // douban workarounds
+    doubanCDN: [".doubanio.com"],
+    doubanReferer: "https://movie.douban.com/",
     // 黑名单，URL 中含有任何一个关键字都会被阻断
     // blockList: [".m3u8", ".ts", ".acc", ".m4s", "photocall.tv", "googlevideo.com", "liveradio.ie"],
     blockList: [],
@@ -139,6 +145,10 @@ function buildUpstreamHeaders(reqHeaders, runtimeConfig, url, hasRequestBody) {
             headers.set("referer", runtimeConfig.weiboReferer);
         } else if (runtimeConfig.sspaiCDN.some((suffix) => host.endsWith(suffix))) {
             headers.set("referer", runtimeConfig.sspaiReferer);
+        } else if (runtimeConfig.hellogithubCDN.some((suffix) => host.endsWith(suffix))) {
+            headers.set("referer", runtimeConfig.hellogithubReferer);
+        } else if (runtimeConfig.doubanCDN.some((suffix) => host.endsWith(suffix))) {
+            headers.set("referer", runtimeConfig.doubanReferer);
         }
     }
 
@@ -258,8 +268,8 @@ function blockUrl(url, runtimeConfig) {
 }
 // 阻断 type
 function blockType(type, runtimeConfig) {
-    if (!type) {
-        return true;
+    if (!type || typeof type !== 'string') {
+        return false;
     }
 
     const lowerType = type.toLowerCase();
